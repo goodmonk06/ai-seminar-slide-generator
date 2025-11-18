@@ -20,11 +20,11 @@ export default function PlanPage() {
         const response = await fetch(`/api/plans/${id}`);
         const data = await response.json();
 
-        if (!response.ok) {
-          throw new Error(data.error || "データの取得に失敗しました");
+        if (!data.success) {
+          throw new Error(data.error?.message || "データの取得に失敗しました");
         }
 
-        setPlan(data.plan);
+        setPlan(data.data.plan);
       } catch (err) {
         setError(
           err instanceof Error ? err.message : "エラーが発生しました"

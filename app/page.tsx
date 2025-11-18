@@ -31,12 +31,12 @@ export default function Home() {
 
       const data = await response.json();
 
-      if (!response.ok) {
-        throw new Error(data.error || "エラーが発生しました");
+      if (!data.success) {
+        throw new Error(data.error?.message || "エラーが発生しました");
       }
 
       // 生成されたスライドプランのページに遷移
-      router.push(`/plans/${data.plan.id}`);
+      router.push(`/plans/${data.data.plan.id}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "エラーが発生しました");
       setIsLoading(false);

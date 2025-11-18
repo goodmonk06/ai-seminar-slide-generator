@@ -1,205 +1,457 @@
 # AI Seminar Slide Generator
 
-講演テーマと制約を入れると、スライド構成案と各スライドのポイントを生成するツール。
+AI-powered presentation slide outline generator using Claude API. Input your presentation theme, target audience, and duration to automatically generate a well-structured slide outline with key talking points.
+
+## Overview
+
+This tool leverages Anthropic's Claude AI to generate comprehensive slide outlines for presentations. It helps speakers and content creators quickly scaffold their presentation structure, saving time on initial planning and ensuring comprehensive coverage of topics.
+
+**Key Features:**
+- 🤖 AI-powered slide generation using Claude 3.5 Sonnet
+- 📝 Markdown-based output for easy integration with presentation tools
+- 💾 File-based storage for slide plans
+- 🎯 Customizable by audience, duration, and keywords
+- ✅ Full TypeScript type safety with Zod validation
+- 🧪 Comprehensive test coverage with Vitest
+- 🐳 Docker-ready for easy deployment
 
 ## Tech Stack
 
-- **Next.js 16** (App Router)
-- **TypeScript**
-- **Tailwind CSS**
-- **Anthropic Claude API**
-- **Markdown** 形式でのスライド出力
+### Core Framework
+- **Next.js 16** - React framework with App Router
+- **TypeScript** - Type-safe development
+- **Tailwind CSS** - Utility-first styling
 
-## Features
+### AI & Validation
+- **Anthropic Claude API** - AI slide generation (claude-3.5-sonnet-20241022)
+- **Zod** - Runtime type validation
 
-- 講演テーマ、対象者、時間を入力するだけでAIがスライド構成を自動生成
-- セクション名＋話すポイント3つ程度のMarkdown形式で出力
-- 生成した構成案のコピー・ダウンロード機能
-- シンプルで使いやすいUI
+### Testing & Quality
+- **Vitest** - Unit testing framework
+- **Testing Library** - Component testing utilities
+
+### DevOps
+- **Docker** - Containerization
+- **Docker Compose** - Multi-container orchestration
+
+## Domain Model
+
+### Core Entities
+
+#### SlidePlan
+The primary entity representing a generated slide outline.
+
+```typescript
+interface SlidePlan {
+  id: string;                  // Unique identifier (plan_timestamp_random)
+  title: string;               // Presentation title
+  audience: string;            // Target audience description
+  durationMinutes: number;     // Presentation duration (1-180)
+  keywords?: string;           // Optional keywords for focus
+  outlineMarkdown: string;     // Generated markdown outline
+  createdAt: Date;             // Creation timestamp
+}
+```
+
+### Data Flow
+
+```
+User Input (Form)
+  → Validation (Zod)
+  → AI Generation (Claude API)
+  → Storage (File System)
+  → Display (React UI)
+```
 
 ## Getting Started
 
-### 1. 環境構築
+### Requirements
 
-必要な環境:
-- Node.js 18以上
-- npm または yarn
+- **Node.js**: 18.x or higher
+- **npm**: 9.x or higher
+- **Anthropic API Key**: Get one at [console.anthropic.com](https://console.anthropic.com)
 
-### 2. インストール
+### Quick Start (Local Development)
 
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd ai-seminar-slide-generator
+   ```
+
+2. **Install dependencies**
+   ```bash
+   npm install
+   ```
+
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   ```
+
+   Edit `.env` and add your Anthropic API key:
+   ```
+   ANTHROPIC_API_KEY=your_api_key_here
+   ```
+
+4. **Seed demo data** (optional)
+   ```bash
+   npm run db:seed
+   ```
+
+5. **Start development server**
+   ```bash
+   npm run dev
+   ```
+
+6. **Open your browser**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+### Quick Start (Docker)
+
+1. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env and add your ANTHROPIC_API_KEY
+   ```
+
+2. **Build and start with Docker Compose**
+   ```bash
+   docker compose up -d
+   ```
+
+3. **View logs** (optional)
+   ```bash
+   npm run docker:logs
+   ```
+
+4. **Access the application**
+   Navigate to [http://localhost:3000](http://localhost:3000)
+
+5. **Stop the application**
+   ```bash
+   npm run docker:down
+   ```
+
+## Example Flow (Vertical Slice)
+
+This project implements a complete end-to-end flow for slide generation:
+
+### 1. Create a Slide Plan
+
+**Via UI:**
+1. Navigate to http://localhost:3000
+2. Fill in the form:
+   - **Title**: "機械学習入門 - 実践から学ぶAI開発"
+   - **Audience**: "エンジニア初級〜中級"
+   - **Duration**: 45 minutes
+   - **Keywords**: "Python, TensorFlow, 機械学習" (optional)
+3. Click "スライド構成案を生成"
+4. AI generates a comprehensive outline with ~10 slides
+5. View, copy, or download the generated outline
+
+**Via API:**
 ```bash
-# リポジトリをクローン
-git clone <repository-url>
-cd ai-seminar-slide-generator
-
-# 依存パッケージをインストール
-npm install
+curl -X POST http://localhost:3000/api/generate \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "TypeScript実践テクニック",
+    "audience": "フロントエンド開発者",
+    "durationMinutes": 30,
+    "keywords": "TypeScript, 型安全性"
+  }'
 ```
 
-### 3. 環境変数の設定
+### 2. Retrieve a Slide Plan
 
-`.env.example` をコピーして `.env` ファイルを作成し、Anthropic APIキーを設定します。
+**Via UI:**
+- Access `/plans/{id}` from the generation success page
+- View the generated outline
+- Copy to clipboard or download as Markdown
 
+**Via API:**
 ```bash
-cp .env.example .env
+curl http://localhost:3000/api/plans/{plan_id}
 ```
 
-`.env` ファイルを編集:
+### 3. Demo Data
 
-```
-ANTHROPIC_API_KEY=your_actual_api_key_here
-```
+After running `npm run db:seed`, you can explore three pre-generated slide plans:
+- Machine Learning fundamentals (45 min)
+- TypeScript best practices (30 min)
+- Agile development introduction (60 min)
 
-Anthropic APIキーは [Anthropic Console](https://console.anthropic.com/) で取得できます。
+Check the `data/` directory for the generated JSON files.
 
-### 4. 開発サーバーの起動
-
-```bash
-npm run dev
-```
-
-ブラウザで http://localhost:3000 を開きます。
-
-### 5. 本番ビルド
-
-```bash
-npm run build
-npm start
-```
-
-## 使い方
-
-1. トップページで以下の情報を入力:
-   - **講演テーマ**: プレゼンのタイトル・テーマ
-   - **対象者**: 聴衆の属性や経験レベル
-   - **講演時間**: 分単位で指定（1〜180分）
-   - **キーワード**（任意）: 重視したいトピックやキーワード
-
-2. 「スライド構成案を生成」ボタンをクリック
-
-3. 生成されたスライド構成案が表示されます
-
-4. 構成案をコピーまたはMarkdownファイルとしてダウンロード
-
-## 生成されたMarkdownの活用方法
-
-本ツールで生成されるMarkdownは、以下のような構造になっています:
-
-```markdown
-# スライド1: イントロダクション
-- 自己紹介と講演の目的
-- 今日学べること
-- タイムライン
-
-# スライド2: 背景と課題
-- 現状の問題点
-- なぜこのテーマが重要か
-- 解決すべき課題
-```
-
-### KeynoteやPowerPointへの移行方法
-
-生成されたMarkdown構成案を、実際のプレゼンテーションツールで使用する際の推奨手順:
-
-#### Keynote (macOS)
-
-1. 生成されたMarkdownをコピーまたはダウンロード
-2. Keynoteで新規プレゼンテーションを作成
-3. 各 `# スライド番号: タイトル` を新しいスライドの見出しに
-4. 箇条書き（`-`）部分をスライドの本文に転記
-5. テーマやデザインを適用
-6. 図表、画像、グラフなどのビジュアルを追加
-
-#### PowerPoint (Windows/macOS)
-
-1. 生成されたMarkdownをコピーまたはダウンロード
-2. PowerPointで新規プレゼンテーションを作成
-3. 各 `#` で始まる見出しを新しいスライドのタイトルに
-4. 箇条書き部分をスライドのコンテンツに転記
-5. デザインテンプレートを適用
-6. SmartArtやアイコンを追加してビジュアルを強化
-
-#### Google Slides
-
-1. 生成されたMarkdownをコピー
-2. Google Slidesで新規プレゼンテーションを作成
-3. 構成案に従ってスライドを追加
-4. 各スライドにタイトルとポイントを入力
-5. テーマやレイアウトを選択
-6. 画像や図形を挿入
-
-#### Markdown対応ツール（Marp, reveal.js など）
-
-Markdown形式のままプレゼンテーションを作成したい場合:
-
-- **Marp**: VS Code拡張機能でMarkdownから直接スライド生成
-- **reveal.js**: Web上で動くMarkdownベースのプレゼンツール
-- **Slidev**: 開発者向けのMarkdownプレゼンツール
-
-これらのツールでは、生成されたMarkdownを軽微な調整だけでそのまま使用できます。
-
-### 活用のコツ
-
-- 生成された構成案はあくまで**たたき台**として使用
-- 各スライドのポイントを参考に、詳細な内容を肉付け
-- 聴衆に合わせて図表やビジュアルを追加
-- 実際の講演時間に合わせてスライド数を調整
-- デモやライブコーディングなど、インタラクティブな要素を追加
-
-## プロジェクト構成
+## Project Structure
 
 ```
 ai-seminar-slide-generator/
-├── app/
+├── app/                      # Next.js App Router
 │   ├── api/
-│   │   ├── generate/       # スライド生成API
-│   │   └── plans/[id]/     # スライドプラン取得API
-│   ├── plans/[id]/         # スライド詳細ページ
-│   ├── layout.tsx          # ルートレイアウト
-│   ├── page.tsx            # トップページ（フォーム）
-│   └── globals.css         # グローバルスタイル
-├── lib/
-│   ├── types.ts            # TypeScript型定義
-│   ├── storage.ts          # データストレージ層
-│   └── ai.ts               # AI生成ロジック
-├── data/                   # 生成されたプランの保存先（.gitignore対象）
-└── public/                 # 静的ファイル
+│   │   ├── generate/         # POST /api/generate - Create slide plan
+│   │   └── plans/[id]/       # GET /api/plans/:id - Retrieve plan
+│   ├── plans/[id]/           # Slide plan detail page
+│   ├── layout.tsx            # Root layout
+│   ├── page.tsx              # Home page with input form
+│   └── globals.css           # Global styles
+├── lib/                      # Core business logic
+│   ├── types.ts              # Type definitions & Zod schemas
+│   ├── storage.ts            # File-based storage layer
+│   ├── ai.ts                 # Claude API integration
+│   ├── api-utils.ts          # API response helpers
+│   └── __tests__/            # Unit tests
+├── scripts/
+│   └── seed.ts               # Database seeding script
+├── test/
+│   └── setup.ts              # Vitest setup
+├── data/                     # Generated slide plans (gitignored)
+├── public/                   # Static assets
+├── Dockerfile                # Docker image definition
+├── docker-compose.yml        # Docker orchestration
+└── vitest.config.ts          # Test configuration
 ```
 
-## データストレージ
+## Available Scripts
 
-現在の実装では、生成されたスライドプランは `data/` ディレクトリにJSON形式で保存されます。本番環境では、データベース（PostgreSQL, MongoDB等）への移行を推奨します。
+### Development
+```bash
+npm run dev          # Start development server on :3000
+npm run build        # Build for production
+npm run start        # Start production server
+npm run lint         # Run ESLint
+npm run type-check   # TypeScript type checking
+```
 
-## ライセンス
+### Testing
+```bash
+npm test             # Run all tests once
+npm run test:watch   # Run tests in watch mode
+npm run test:ui      # Open Vitest UI
+```
+
+### Data Management
+```bash
+npm run db:seed      # Seed demo slide plans
+```
+
+### Docker
+```bash
+npm run docker:build # Build Docker image
+npm run docker:up    # Start containers in background
+npm run docker:down  # Stop and remove containers
+npm run docker:logs  # View container logs
+```
+
+## API Reference
+
+### POST /api/generate
+
+Generate a new slide plan.
+
+**Request Body:**
+```typescript
+{
+  title: string;              // Required, 1-200 chars
+  audience: string;           // Required, 1-100 chars
+  durationMinutes: number;    // Required, 1-180 (integer)
+  keywords?: string;          // Optional, max 500 chars
+}
+```
+
+**Success Response (201):**
+```typescript
+{
+  success: true,
+  data: {
+    plan: SlidePlan
+  }
+}
+```
+
+**Error Response (400/500):**
+```typescript
+{
+  success: false,
+  error: {
+    message: string,
+    code?: string,
+    details?: unknown
+  }
+}
+```
+
+### GET /api/plans/:id
+
+Retrieve a slide plan by ID.
+
+**Success Response (200):**
+```typescript
+{
+  success: true,
+  data: {
+    plan: SlidePlan
+  }
+}
+```
+
+**Error Response (404/500):**
+```typescript
+{
+  success: false,
+  error: {
+    message: string,
+    code?: string
+  }
+}
+```
+
+## Using Generated Markdown
+
+The generated Markdown outline can be used with various presentation tools:
+
+### Keynote / PowerPoint / Google Slides
+1. Copy the generated Markdown
+2. Use each `# Slide N: Title` as a slide heading
+3. Use bullet points as slide content
+4. Add visuals, charts, and design elements
+
+### Markdown Presentation Tools
+- **Marp**: VS Code extension for Markdown presentations
+- **reveal.js**: Web-based presentation framework
+- **Slidev**: Developer-focused presentation tool
+
+The generated format is:
+```markdown
+# Slide 1: Introduction
+- First key point
+- Second key point
+- Third key point
+
+# Slide 2: Main Topic
+- Detail 1
+- Detail 2
+- Detail 3
+```
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Watch mode (useful during development)
+npm run test:watch
+
+# Open Vitest UI
+npm run test:ui
+```
+
+### Test Coverage
+
+- **Validation**: Zod schema validation (lib/__tests__/types.test.ts)
+- **Storage**: File operations and data persistence (lib/__tests__/storage.test.ts)
+- **API Utils**: Response formatting and error handling (lib/__tests__/api-utils.test.ts)
+
+## Deployment
+
+### Environment Variables
+
+Required:
+- `ANTHROPIC_API_KEY`: Your Anthropic API key
+
+Optional:
+- `NODE_ENV`: Set to `production` for production builds
+- `PORT`: Server port (default: 3000)
+
+### Docker Deployment
+
+```bash
+# Build and run with Docker Compose
+docker compose up -d
+
+# Or build and run manually
+docker build -t ai-seminar-slide-generator .
+docker run -p 3000:3000 \
+  -e ANTHROPIC_API_KEY=your_key \
+  -v $(pwd)/data:/app/data \
+  ai-seminar-slide-generator
+```
+
+### Production Considerations
+
+- **Data Persistence**: Currently uses file-based storage in `data/`. For production, consider migrating to PostgreSQL, MongoDB, or another database.
+- **API Rate Limiting**: Implement rate limiting to prevent abuse
+- **Caching**: Consider caching responses for similar requests
+- **Monitoring**: Add application monitoring and error tracking
+- **Scaling**: Use a database instead of file storage for horizontal scaling
+
+## Future Extensions
+
+### Planned Features
+- [ ] **Database Integration**: PostgreSQL with Prisma ORM
+- [ ] **User Authentication**: NextAuth.js integration
+- [ ] **Template System**: Customizable prompt templates
+- [ ] **Export Formats**: Direct export to PPTX, PDF
+- [ ] **Collaboration**: Share and collaborate on slide outlines
+- [ ] **Version History**: Track and compare outline versions
+- [ ] **Multi-language**: Support for multiple presentation languages
+- [ ] **Advanced AI Controls**: Temperature, tone, and style customization
+- [ ] **Slide Library**: Reusable slide components and templates
+
+### Integration Opportunities
+- **Presentation Tools**: Direct integration with Google Slides, PowerPoint
+- **Content Management**: Import from notion, Confluence, etc.
+- **Analytics**: Track which outlines perform best
+- **Team Features**: Organization accounts, shared templates
+
+## Troubleshooting
+
+### Common Issues
+
+**API Key Error**
+- Ensure `ANTHROPIC_API_KEY` is set in `.env`
+- Verify the key is valid at [console.anthropic.com](https://console.anthropic.com)
+- Restart the development server after changing `.env`
+
+**Slow Generation**
+- Claude API typically takes 5-15 seconds
+- Check your network connection
+- Verify API rate limits haven't been exceeded
+
+**Tests Failing**
+```bash
+# Clear test cache and rerun
+rm -rf node_modules/.vitest
+npm test
+```
+
+**Docker Issues**
+```bash
+# Rebuild without cache
+docker compose build --no-cache
+
+# Check logs
+docker compose logs -f
+```
+
+## Contributing
+
+This project follows conventional commit messages and uses TypeScript strict mode. When contributing:
+
+1. Run `npm test` before committing
+2. Ensure `npm run type-check` passes
+3. Follow the existing code style
+4. Add tests for new features
+
+## License
 
 MIT
 
-## 開発者向け
+## Acknowledgments
 
-### 環境
-
-- Node.js 18+
-- TypeScript 5+
-- Next.js 16
-- Anthropic Claude API (claude-3-5-sonnet-20241022)
-
-### スクリプト
-
-- `npm run dev` - 開発サーバー起動
-- `npm run build` - 本番ビルド
-- `npm start` - 本番サーバー起動
-- `npm run lint` - ESLintチェック
-
-## トラブルシューティング
-
-### APIキーエラーが出る
-
-- `.env` ファイルが正しく作成されているか確認
-- `ANTHROPIC_API_KEY` が正しく設定されているか確認
-- 開発サーバーを再起動
-
-### スライド生成が遅い
-
-- Anthropic APIは通常5-15秒程度かかります
-- ネットワーク環境を確認
-- API利用制限に達していないか確認
+- Powered by [Anthropic Claude](https://www.anthropic.com)
+- Built with [Next.js](https://nextjs.org)
+- Styled with [Tailwind CSS](https://tailwindcss.com)

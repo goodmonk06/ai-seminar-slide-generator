@@ -1,13 +1,22 @@
 {
   "name": "ai-seminar-slide-generator",
   "version": "1.0.0",
-  "description": "",
+  "description": "AI-powered slide outline generator for presentations using Claude API",
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "type-check": "tsc --noEmit",
+    "db:seed": "tsx scripts/seed.ts",
+    "docker:build": "docker build -t ai-seminar-slide-generator .",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f"
   },
   "repository": {
     "type": "git",
@@ -28,6 +37,15 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tailwindcss": "^4.1.17",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "zod": "^4.1.12"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@vitejs/plugin-react": "^5.1.1",
+    "happy-dom": "^20.0.10",
+    "tsx": "^4.20.6",
+    "vitest": "^4.0.10"
   }
 }

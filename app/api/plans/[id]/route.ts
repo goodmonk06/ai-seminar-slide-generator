@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import { getSlidePlan } from "@/lib/storage";
+import { successResponse, errorResponse, handleApiError } from "@/lib/api-utils";
 
 export async function GET(
   request: NextRequest,
@@ -7,21 +8,23 @@ export async function GET(
 ) {
   try {
     const { id } = await params;
+
+    if (!id || typeof id !== "string") {
+      return errorResponse("有効なIDを指定してください", 400, "INVALID_ID");
+    }
+
     const plan = await getSlidePlan(id);
 
     if (!plan) {
-      return NextResponse.json(
-        { error: "スライドプランが見つかりません" },
-        { status: 404 }
+      return errorResponse(
+        "スライドプランが見つかりません",
+        404,
+        "NOT_FOUND"
       );
     }
 
-    return NextResponse.json({ plan });
+    return successResponse({ plan });
   } catch (error) {
-    console.error("Error fetching slide plan:", error);
-    return NextResponse.json(
-      { error: "スライドプランの取得中にエラーが発生しました" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
