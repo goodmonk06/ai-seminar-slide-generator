@@ -43,6 +43,7 @@ describe("Storage", () => {
 
   describe("saveSlidePlan and getSlidePlan", () => {
     it("should save and retrieve a slide plan", async () => {
+      const now = new Date();
       const plan: SlidePlan = {
         id: generateId(),
         title: "Test Presentation",
@@ -50,7 +51,11 @@ describe("Storage", () => {
         durationMinutes: 30,
         keywords: "test, demo",
         outlineMarkdown: "# Slide 1\n- Point 1\n- Point 2",
-        createdAt: new Date(),
+        version: 1,
+        tags: [],
+        metadata: {},
+        createdAt: now,
+        updatedAt: now,
       };
 
       await saveSlidePlan(plan);
@@ -71,13 +76,18 @@ describe("Storage", () => {
     });
 
     it("should handle plan without keywords", async () => {
+      const now = new Date();
       const plan: SlidePlan = {
         id: generateId(),
         title: "Test Presentation",
         audience: "Developers",
         durationMinutes: 30,
         outlineMarkdown: "# Slide 1\n- Point 1",
-        createdAt: new Date(),
+        version: 1,
+        tags: [],
+        metadata: {},
+        createdAt: now,
+        updatedAt: now,
       };
 
       await saveSlidePlan(plan);
@@ -89,19 +99,27 @@ describe("Storage", () => {
   });
 
   describe("getAllSlidePlans", () => {
-    it("should return empty array when no plans exist", async () => {
-      const plans = await getAllSlidePlans();
-      expect(plans).toEqual([]);
+    it("should return empty result when no plans exist", async () => {
+      const result = await getAllSlidePlans();
+      expect(result.items).toEqual([]);
+      expect(result.total).toBe(0);
     });
 
     it("should return all saved plans", async () => {
+      const now1 = new Date(Date.now() - 1000);
+      const now2 = new Date();
+
       const plan1: SlidePlan = {
         id: generateId(),
         title: "Presentation 1",
         audience: "Developers",
         durationMinutes: 30,
         outlineMarkdown: "# Slide 1",
-        createdAt: new Date(Date.now() - 1000),
+        version: 1,
+        tags: [],
+        metadata: {},
+        createdAt: now1,
+        updatedAt: now1,
       };
 
       const plan2: SlidePlan = {
@@ -110,18 +128,23 @@ describe("Storage", () => {
         audience: "Designers",
         durationMinutes: 45,
         outlineMarkdown: "# Slide 1",
-        createdAt: new Date(),
+        version: 1,
+        tags: [],
+        metadata: {},
+        createdAt: now2,
+        updatedAt: now2,
       };
 
       await saveSlidePlan(plan1);
       await saveSlidePlan(plan2);
 
-      const plans = await getAllSlidePlans();
-      expect(plans).toHaveLength(2);
+      const result = await getAllSlidePlans();
+      expect(result.items).toHaveLength(2);
+      expect(result.total).toBe(2);
 
       // 新しい順にソートされているか確認
-      expect(plans[0].id).toBe(plan2.id);
-      expect(plans[1].id).toBe(plan1.id);
+      expect(result.items[0].id).toBe(plan2.id);
+      expect(result.items[1].id).toBe(plan1.id);
     });
   });
 });

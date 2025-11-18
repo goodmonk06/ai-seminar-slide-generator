@@ -8,7 +8,7 @@
 import { saveSlidePlan, generateId } from "../lib/storage";
 import { SlidePlan } from "../lib/types";
 
-const demoPlans: Omit<SlidePlan, "id" | "createdAt">[] = [
+const demoPlans: Omit<SlidePlan, "id" | "createdAt" | "updatedAt" | "version" | "tags" | "metadata">[] = [
   {
     title: "機械学習入門 - 実践から学ぶAI開発",
     audience: "エンジニア初級〜中級",
@@ -186,10 +186,15 @@ async function seed() {
 
   try {
     for (const planData of demoPlans) {
+      const now = new Date();
       const plan: SlidePlan = {
         ...planData,
         id: generateId(),
-        createdAt: new Date(),
+        version: 1,
+        tags: [],
+        metadata: {},
+        createdAt: now,
+        updatedAt: now,
       };
 
       await saveSlidePlan(plan);

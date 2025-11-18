@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
     const outlineMarkdown = await generateSlideOutline(validatedInput);
 
     // スライドプランの作成と保存
+    const now = new Date();
     const plan: SlidePlan = {
       id: generateId(),
       title: validatedInput.title,
@@ -36,7 +37,13 @@ export async function POST(request: NextRequest) {
       durationMinutes: validatedInput.durationMinutes,
       keywords: validatedInput.keywords,
       outlineMarkdown,
-      createdAt: new Date(),
+      templateId: validatedInput.templateId,
+      userId: validatedInput.userId,
+      tags: validatedInput.tags || [],
+      metadata: {},
+      version: 1,
+      createdAt: now,
+      updatedAt: now,
     };
 
     await saveSlidePlan(plan);
