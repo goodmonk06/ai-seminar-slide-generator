@@ -11,12 +11,22 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
     "type-check": "tsc --noEmit",
+    "cli": "tsx src/cli.ts",
     "db:seed": "tsx scripts/seed.ts",
+    "db:seed:rich": "tsx scripts/seed-rich.ts",
+    "db:clean": "rm -rf data/*",
+    "db:reset": "npm run db:clean && npm run db:seed",
+    "db:reset:rich": "npm run db:clean && npm run db:seed:rich",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "quality": "npm run type-check && npm run lint && npm run test",
     "docker:build": "docker build -t ai-seminar-slide-generator .",
     "docker:up": "docker compose up -d",
     "docker:down": "docker compose down",
-    "docker:logs": "docker compose logs -f"
+    "docker:logs": "docker compose logs -f",
+    "docker:clean": "docker compose down -v && docker rmi ai-seminar-slide-generator || true"
   },
   "repository": {
     "type": "git",
